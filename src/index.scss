@@ -1,0 +1,152 @@
+html {
+  scroll-behavior: smooth;
+}
+
+@font-face {
+  src: url(./assets/fonts/GeneralSans-Bold.otf);
+  font-family: "sans-bold";
+}
+
+@font-face {
+  src: url(./assets/fonts/GeneralSans-Extralight.otf);
+  font-family: "sans-extralight";
+}
+
+@font-face {
+  src: url(./assets/fonts/GeneralSans-Light.otf);
+  font-family: "sans-light";
+}
+
+@font-face {
+  src: url(./assets/fonts/GeneralSans-Medium.otf);
+  font-family: "sans-medium";
+}
+
+@font-face {
+  src: url(./assets/fonts/GeneralSans-Regular.otf);
+  font-family: "sans-regular";
+}
+
+@font-face {
+  src: url(./assets/fonts/GeneralSans-Semibold.otf);
+  font-family: "sans-semibold";
+}
+
+$fontRegular: "sans-regular";
+$fontMedium: "sans-medium";
+$fontSemiBold: "sans-semibold";
+$fontBold: "sans-bold";
+$fontLight: "sans-light";
+$fontExtraLight: "sans-extralight";
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "sans-regular";
+}
+
+body {
+  background: #fcfcfc;
+  font-family: "sans-regular";
+}
+
+a {
+  text-decoration: none;
+}
+
+.cursor {
+  cursor: pointer;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.screen_template {
+  margin: 0 260px 0 70px;
+  padding: 2em 1em;
+
+  @media (max-width: 992px) {
+    margin: 0;
+  }
+}
+
+.flex_center {
+  width: 100%;
+  height: 100vh;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  grid-gap: 1em;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1200;
+
+  .mob {
+    display: none;
+    @media (max-width: 576px) {
+      display: initial;
+    }
+  }
+  .web {
+    display: initial;
+    @media (max-width: 576px) {
+      display: none;
+    }
+  }
+}
+
+.card_wrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-column-gap: 1em;
+  grid-row-gap: 1.25em;
+  margin-bottom: 2em;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 576px) {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+.loader {
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-gap: 2em;
+}
+
+.no_artifacts {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  grid-gap: 2em;
+  height: calc(100vh - 80px);
+  padding: 2em;
+
+  img {
+    max-width: 400px;
+    width: 100%;
+  }
+}
+
+.tutorials_screen {
+  display: grid;
+  place-items: center;
+  height: 90vh;
+}

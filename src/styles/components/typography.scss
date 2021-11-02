@@ -1,0 +1,23 @@
+@import "../../index.scss";
+
+.text_primary {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0.04em;
+  color: #343434;
+  font-family: $fontBold;
+
+  &.size14 {
+    font-size: 14px;
+    line-height: 22px;
+  }
+}
+
+.text_secondary {
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: 0.04em;
+  color: #7d7d7d;
+}

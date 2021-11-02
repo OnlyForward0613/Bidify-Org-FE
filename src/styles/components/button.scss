@@ -1,0 +1,67 @@
+.primary_btn {
+  border: none;
+  outline: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #f79420;
+  color: rgba(255, 255, 255, 1);
+  padding: 10px 1em;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-gap: 8px;
+  transform: scale(1);
+  transition: 300ms all;
+
+  &:active {
+    transform: scale(0.95);
+    transition: 300ms all;
+  }
+}
+
+.secondary_btn {
+  background: transparent;
+  color: #343434;
+  border: 1px solid #f79420;
+  padding: 10px 1em;
+  outline: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-gap: 8px;
+  transform: scale(1);
+  transition: 300ms all;
+
+  &:active {
+    transform: scale(0.9);
+    transition: 300ms all;
+  }
+}
+
+.explore_btn {
+  border: none;
+  outline: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #1b1b1b;
+  color: #fff;
+  padding: 10px 1em;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-gap: 8px;
+  transform: scale(1);
+  transition: 300ms all;
+
+  &:active {
+    transform: scale(0.99);
+    transition: 300ms all;
+  }
+}

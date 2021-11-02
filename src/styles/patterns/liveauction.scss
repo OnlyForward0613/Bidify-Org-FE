@@ -1,0 +1,22 @@
+@import "../../index.scss";
+
+.live_auction_card_wrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-column-gap: 1em;
+  grid-row-gap: 1.25em;
+  margin-bottom: 2em;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 576px) {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+.center {
+  display: grid;
+  place-items: center;
+  min-height: 300px;
+}
