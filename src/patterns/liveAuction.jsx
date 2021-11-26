@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react";
+import React, { useEffect, useContext, useState } from "react";
 import { FetchWrapper } from "use-nft";
 import { ethers, Contract } from "ethers";
 import Web3 from "web3";
@@ -26,14 +26,12 @@ import { getListing } from "../utils/Bidify";
 
 const LiveAuction = () => {
   //INITIALIZING HOOKS
-
   const { userState, userDispatch } = useContext(UserContext);
   const { account, chainId } = useWeb3React();
 
   //HANDLING METHODS
 
   useEffect(() => {
-    console.log("live auction rendered");
     if (!userState?.isLiveAuctionFetched) getLists();
   }, []);
 
@@ -51,7 +49,6 @@ const LiveAuction = () => {
       const result = await getListing(i.toString());
       Lists[i] = result;
     }
-    console.log(Lists);
     getDetails(Lists);
   };
 
@@ -107,19 +104,29 @@ const LiveAuction = () => {
       ethers: { Contract },
       provider: provider,
     };
-
-    //console.log(ethereum);
-
+    
     const fetcher = ["ethers", ethersConfig];
 
     function ipfsUrl(cid, path = "") {
       return `https://dweb.link/ipfs/${cid}${path}`;
     }
 
+    function imageurl(url) {
+      const string = url;
+      const check = url.substr(16, 4);
+      if (check === "ipfs") {
+        const manipulated = url.substr(16, 16 + 45);
+        return "https://dweb.link/" + manipulated;
+      } else {
+        return `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+      }
+    }
     const fetchWrapper = new FetchWrapper(fetcher, {
       jsonProxy: (url) => {
-        console.log(url);
-        return url;
+        return `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+      },
+      imageProxy: (url) => {
+        return imageurl(url);
       },
       ipfsUrl: (cid, path) => {
         return ipfsUrl(cid, path);
@@ -129,7 +136,7 @@ const LiveAuction = () => {
     const result = await fetchWrapper
       .fetchNft(val?.platform, val?.token)
       .catch((err) => {
-        console.log(err);
+        console.log("fetchWrapper error", err.message);
       });
     const finalResult = {
       ...result,
@@ -143,7 +150,6 @@ const LiveAuction = () => {
   const getDetails = async (lists) => {
     const unsolvedPromises = lists.map((val) => getFetchValues(val));
     const results = await Promise.all(unsolvedPromises);
-    console.log(results);
     const filteredData = results.filter((val) => val.paidOut !== true);
     const userBiddings = results.filter((value) =>
       value.bids.some(

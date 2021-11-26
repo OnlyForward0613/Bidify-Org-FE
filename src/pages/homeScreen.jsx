@@ -57,15 +57,11 @@ const HomeScreen = () => {
     setCurrentPlatform(platform);
     setCurrentState(name);
     let result = [];
-    // var unsolvedPromises = tokenList.map((list) => getNfts(platform, list));
-    // const data = await Promise.all(unsolvedPromises);
     var total = totalData === 9 ? totalData : totalData + 1;
     for (let i = initialLoad; i < total; i++) {
       var res = await getNfts(platform, i);
       result.push(res);
     }
-    // console.log(data);
-    // setInitialLoad(totalData + 1);
     setloading(false);
     setNftData(result);
   };

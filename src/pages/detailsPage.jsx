@@ -7,6 +7,7 @@ import Countdown from "react-countdown";
 import { useWeb3React } from "@web3-react/core";
 import { ethers, Contract } from "ethers";
 import { LazyLoadImage } from "react-lazy-load-image-component";
+import { getSymbol } from "../utils/getCurrencySymbol";
 import "react-lazy-load-image-component/src/effects/blur.css";
 //STYLESHEET
 
@@ -51,7 +52,7 @@ const DetailsPage = () => {
   const [paramId, setParamId] = useState();
   const { chainId, account } = useWeb3React();
   const [isPlay, setIsPlay] = useState(false);
-
+  const [yourBid, setYourBid] = useState(0);
   //HANDLING METHODS
 
   useEffect(() => {
@@ -71,7 +72,6 @@ const DetailsPage = () => {
       const result = await getListing(i.toString());
       Lists[i] = result;
     }
-    console.log(Lists);
     getDetails(Lists, id);
   };
 
@@ -128,8 +128,6 @@ const DetailsPage = () => {
       provider: provider,
     };
 
-    //console.log(ethereum);
-
     const fetcher = ["ethers", ethersConfig];
 
     function ipfsUrl(cid, path = "") {
@@ -139,10 +137,8 @@ const DetailsPage = () => {
     function imageurl(url) {
       const string = url;
       const check = url.substr(16, 4);
-      console.log(check);
       if (check === "ipfs") {
         const manipulated = url.substr(16, 16 + 45);
-        console.log(manipulated);
         return "https://dweb.link/" + manipulated;
       } else {
         return `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
@@ -165,11 +161,13 @@ const DetailsPage = () => {
       },
     });
     const result = await fetchWrapper.fetchNft(val?.platform, val?.token);
+    const res = await getSymbol(val.currency);
     const finalResult = {
       ...result,
       platform: val?.platform,
       token: val?.token,
       ...val,
+      symbol: res
     };
     return finalResult;
   };
@@ -177,13 +175,10 @@ const DetailsPage = () => {
   const getDetails = async (lists, id) => {
     const unsolvedPromises = lists.map((val) => getFetchValues(val));
     const results = await Promise.all(unsolvedPromises);
-    console.log(results);
     const filteredData = results.filter((val) => val.id === String(id));
     setData(filteredData);
   };
-
-  console.log(data);
-
+  
   const handleFinishAuction = async (id) => {
     setIsLoading(true);
     try {
@@ -208,11 +203,11 @@ const DetailsPage = () => {
     }
   };
 
-  const handleBidMethod = async (id) => {
+  const handleBidMethod = async (id, amount) => {
     setIsLoading(true);
     try {
-      await signBid(id);
-      await bid(id);
+      await signBid(id, amount);
+      await bid(id, amount);
       setIsLoading(false);
       setIsSuccess(true);
       setTimeout(() => {
@@ -244,7 +239,7 @@ const DetailsPage = () => {
                       variant="primary"
                       style={{ color: "#F79420", fontWeight: 500 }}
                     >
-                      {val.currentBid ? val.currentBid : 0} BIT
+                      {val.currentBid ? val.currentBid : 0} {val.symbol}
                     </Text>
                     <Text style={{ fontSize: 12 }}>Reserved price</Text>
                   </div>
@@ -283,7 +278,7 @@ const DetailsPage = () => {
                       variant="primary"
                       style={{ color: "#F79420", fontWeight: 500 }}
                     >
-                      {val.currentBid ? val.currentBid : 0} BIT $(222)
+                      {val.currentBid ? val.currentBid : 0} {val.symbol}
                     </Text>
                     <Text style={{ fontSize: 12 }}>Current bid</Text>
                   </div>
@@ -312,8 +307,9 @@ const DetailsPage = () => {
                         Bid amount
                       </Text>
                       <div className="form_input">
-                        <Text variant="primary">{val.nextBid}</Text>
-                        <Text style={{ color: "#F79420" }}>BIT</Text>
+                        {/* <Text variant="primary">{val.nextBid}</Text> */}
+                        <input className="bid-input" type="number" defaultValue={val.nextBid} onChange={(e) => {setYourBid(e.target.value)}} />
+                        <Text style={{ color: "#F79420" }}>{val.symbol}</Text>
                       </div>
                     </>
                   )}
@@ -328,7 +324,7 @@ const DetailsPage = () => {
                   ) : (
                     <Button
                       variant="primary"
-                      onClick={() => handleBidMethod(val.id)}
+                      onClick={() => handleBidMethod(val.id, yourBid ? yourBid : val.nextBid)}
                     >
                       Place Your Bid
                     </Button>

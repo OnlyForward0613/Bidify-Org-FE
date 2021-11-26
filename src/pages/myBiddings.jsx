@@ -47,7 +47,6 @@ const MyBiddings = () => {
       const result = await getListing(i.toString());
       Lists[i] = result;
     }
-    console.log(Lists);
     getDetails(Lists);
   };
 
@@ -104,8 +103,6 @@ const MyBiddings = () => {
       provider: provider,
     };
 
-    //console.log(ethereum);
-
     const fetcher = ["ethers", ethersConfig];
 
     function ipfsUrl(cid, path = "") {
@@ -115,10 +112,8 @@ const MyBiddings = () => {
     function imageurl(url) {
       const string = url;
       const check = url.substr(16, 4);
-      console.log(check);
       if (check === "ipfs") {
         const manipulated = url.substr(16, 16 + 45);
-        console.log(manipulated);
         return "https://dweb.link/" + manipulated;
       } else {
         return `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
@@ -153,7 +148,6 @@ const MyBiddings = () => {
   const getDetails = async (lists) => {
     const unsolvedPromises = lists.map((val) => getFetchValues(val));
     const results = await Promise.all(unsolvedPromises);
-    console.log(results);
     const filteredData = results.filter((val) => val.paidOut !== true);
     const userBiddings = results.filter((value) =>
       value.bids.some(

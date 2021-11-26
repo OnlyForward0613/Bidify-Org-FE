@@ -133,7 +133,6 @@ const Profile = () => {
   };
 
   const handleSwitchNetwork = async (chainId) => {
-    console.log(chainId);
     switch (Number(chainId)) {
       case 1:
         await switchNetwork(Number(1));

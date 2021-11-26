@@ -24,10 +24,10 @@ import pauseImg from "../assets/icons/pause-circle.svg";
 import { BIT, BIDIFY } from "../utils/config";
 import { getDecimals, atomic } from "../utils/Bidify";
 import { useWeb3React } from "@web3-react/core";
-import { ERC721 } from "../utils/config";
+import { ERC721, ERC1155 } from "../utils/config";
 
 const CollectionCard = (props) => {
-  const { name, description, image, platform, token, getDetails } = props;
+  const { name, description, image, platform, token, getDetails, isERC721 } = props;
 
   const { chainId, account } = useWeb3React();
   const videoRef = useRef(null);
@@ -48,13 +48,14 @@ const CollectionCard = (props) => {
     days: "",
     platform,
     token,
-    currency: BIT.address[chainId],
+    currency: "0xc778417E063141139Fce010982780140Aa0cD5Ab"
+    // currency: BIT.address[chainId],
   };
 
   const validationSchema = Yup.object({
     price: Yup.number()
       .typeError("price must be a number")
-      .min(20, "price must be greater than 20")
+      .min(0, "price must be greater than 20")
       .required("This field is required"),
     days: Yup.number()
       .typeError("days must be a number")
@@ -65,18 +66,17 @@ const CollectionCard = (props) => {
 
   const onSubmit = async (values, onSubmitProps) => {
     const { currency, platform, token, price, days } = values;
-    console.log(values);
     setIsModal(false);
     setIsLoading(true);
     setProcessContent(
       "Please allow https://bidify.org permission within your wallet when prompted, there will be a small fee for this…"
     );
     try {
-      await signList({ currency, platform, token, price, days });
+      await signList({ currency, platform, token, price, days, isERC721 });
       setProcessContent(
         "Confirm the second transaction to allow your NFT to be listed, there will be another small network fee."
       );
-      await list({ currency, platform, token, price, days });
+      await list({ currency, platform, token, price, days, isERC721 });
       setIsLoading(false);
       setIsSuccess(true);
       getDetails();
@@ -103,21 +103,22 @@ const CollectionCard = (props) => {
     price,
     days,
     allowMarketplace = false,
+    isERC721,
   }) {
-    console.log(currency, platform, token, price, days);
-    //let decimals = await getDecimals(currency);
 
     if (!currency) {
       currency = "0x0000000000000000000000000000000000000000";
     }
 
     const web3 = new Web3(window.ethereum);
-
-    //console.log(currency,platform,token,atomic(price.toString(),decimals),days,"0x0000000000000000000000000000000000000000",allowMarketplace)
-
-    await new web3.eth.Contract(ERC721.abi, platform).methods
-      .approve(BIDIFY.address[chainId], token)
-      .send({ from: account });
+    if(isERC721)
+      await new web3.eth.Contract(ERC721.abi, platform).methods
+        .approve(BIDIFY.address[chainId], token)
+        .send({ from: account });
+    else 
+      await new web3.eth.Contract(ERC1155.abi, platform).methods
+        .setApprovalForAll(BIDIFY.address[chainId], true)
+        .send({ from: account });
   }
 
   async function list({
@@ -129,28 +130,33 @@ const CollectionCard = (props) => {
     allowMarketplace = false,
   }) {
     let decimals = await getDecimals(currency);
-
     if (!currency) {
       currency = "0x0000000000000000000000000000000000000000";
     }
-
     const Bidify = new new Web3(window.ethereum).eth.Contract(
       BIDIFY.abi,
       BIDIFY.address[chainId]
     );
-
-    return await Bidify.methods
+    // return token;
+    const tokenNum = isERC721 ? token : new Web3(window.ethereum).utils.hexToNumberString(token);
+    try{
+      return await Bidify.methods
       .list(
         currency,
         platform,
-        token,
+        tokenNum,
         atomic(price.toString(), decimals),
         days,
         "0x0000000000000000000000000000000000000000",
-        allowMarketplace
+        allowMarketplace,
+        isERC721
       )
       .send({ from: account });
-  }
+    }catch (error) {
+      return console.log("list error", error)
+    }
+    }
+    
 
   const renderCreateForm = (
     <Formik
@@ -163,7 +169,7 @@ const CollectionCard = (props) => {
           <Text>Initial Bid Amount</Text>
           <div className="form_input">
             <Field type="number" name="price" id="price" />
-            <Text style={{ color: "#F79420" }}>BID</Text>
+            <Text style={{ color: "#F79420" }}>WETH</Text>
           </div>
           <ErrorMessage
             name="price"

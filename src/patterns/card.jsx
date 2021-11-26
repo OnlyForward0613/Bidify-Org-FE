@@ -26,13 +26,14 @@ import Web3 from "web3";
 import { BIDIFY } from "../utils/config";
 
 const Card = (props) => {
-  const { name, creator, image, currentBid, endTime, id, currency, getLists } =
+  const { name, creator, image, currentBid, endTime, id, currency, getLists, highBidder } =
     props;
 
   const { account, chainId } = useWeb3React();
   const history = useHistory();
 
   const isUser = account?.toLocaleLowerCase() === creator?.toLocaleLowerCase();
+  const isHighBidder = account?.toLocaleLowerCase() === highBidder?.toLocaleLowerCase();
   const [isModal, setIsModal] = useState(false);
   const [processContent, setProcessContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -40,6 +41,7 @@ const Card = (props) => {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState();
   const [isVideo, setIsVideo] = useState(false);
+  const [symbol, setSymbol] = useState('');
 
   // useEffect(() => {
   //   if (isSuccess) getLists();
@@ -49,7 +51,7 @@ const Card = (props) => {
 
   useEffect(async () => {
     const res = await getSymbol(currency);
-    console.log(res);
+    setSymbol(res);
   }, []);
 
   const handleFinisheAuction = async () => {
@@ -77,18 +79,18 @@ const Card = (props) => {
     }
   };
 
-  const handleBidMethod = async () => {
+  const handleBidMethod = async (amount) => {
     setIsModal(false);
     setIsLoading(true);
     setProcessContent(
       "Please allow https://Bidify.org permission within your wallet when prompted there will be a small fee for this"
     );
     try {
-      await signBid(id);
+      await signBid(id, amount);
       setProcessContent(
         "Confirm the second transaction of your bid amount, there will be a small network fee for this."
       );
-      await bid(id);
+      await bid(id, amount);
       setIsLoading(false);
       setIsSuccess(true);
       getLists();
@@ -115,7 +117,6 @@ const Card = (props) => {
       }
     }
   };
-
   // Renderer callback with condition
   const renderer = ({ days, hours, minutes, seconds, completed }) => {
     if (completed) {
@@ -124,23 +125,26 @@ const Card = (props) => {
         <>
           <div className="card_content_details">
             <div className="block_left">
-              <Text variant="primary" style={{ color: "#F79420" }}>
-                {currentBid ? currentBid : 0} BIT
-              </Text>
-              <Text style={{ fontSize: 12 }}>Reserved price</Text>
+              {
+                currentBid ? 
+                <Text variant="primary" style={{ color: "#F79420" }}>
+                  Sold out for {currentBid} {symbol}
+                </Text> : 
+                <Text style={{ fontSize: 12 }}>Not sold out</Text>
+              }
             </div>
           </div>
-          {isUser ? (
+          {/* {isUser ? ( */}
             <Button
               variant="secondary"
-              style={{ pointerEvents: !isUser && "none" }}
-              onClick={isUser ? () => handleFinisheAuction() : null}
+              // style={{ pointerEvents: !isUser && "none" }}
+              onClick={ () => handleFinisheAuction() }
             >
               Finish auction
             </Button>
-          ) : (
-            <p></p>
-          )}
+          {/* ) : ( */}
+            {/* <p></p> */}
+          {/* )} */}
         </>
       );
     } else {
@@ -150,7 +154,7 @@ const Card = (props) => {
           <div className="card_content_details">
             <div className="block_left">
               <Text variant="primary" style={{ color: "#F79420" }}>
-                {currentBid ? currentBid : 0} BIT
+                {currentBid ? currentBid : 0} {symbol}
               </Text>
               <Text style={{ fontSize: 12 }}>Current Bid</Text>
             </div>
@@ -163,13 +167,13 @@ const Card = (props) => {
           </div>
           <Button
             variant="secondary"
-            style={{ pointerEvents: isUser && "none" }}
+            style={{ pointerEvents: (isUser || isHighBidder) && "none" }}
             onClick={isUser ? null : () => setIsModal(true)}
           >
             {isUser ? (
               <img src={lock} alt="lock" width={14} />
             ) : (
-              "Place Your Bid"
+              !isHighBidder ? "Place Your Bid" : "You are the highest bidder"
             )}
           </Button>
         </>
@@ -239,6 +243,7 @@ const Card = (props) => {
       {renderCard}
       <LiveAuctionModal
         {...props}
+        symbol={symbol}
         handleBidMethod={handleBidMethod}
         isModal={isModal}
         setIsModal={setIsModal}

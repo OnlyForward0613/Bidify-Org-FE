@@ -12,9 +12,6 @@ export const getNfts = async (platform, token) => {
     ethers: { Contract },
     provider: provider,
   };
-
-  //console.log(ethereum);
-
   const fetcher = ["ethers", ethersConfig];
 
   function ipfsUrl(cid, path = "") {
@@ -23,7 +20,6 @@ export const getNfts = async (platform, token) => {
 
   const fetchWrapper = new FetchWrapper(fetcher, {
     jsonProxy: (url) => {
-      console.log(url);
       return url;
     },
     ipfsUrl: (cid, path) => {

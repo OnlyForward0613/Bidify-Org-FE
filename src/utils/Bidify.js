@@ -415,7 +415,6 @@ export async function signList(
   { currency, platform, token, price, days, allowMarketplace = false },
   account
 ) {
-  console.log(currency, platform, token, price, days);
   const web3 = new Web3(window.ethereum);
   const chainId = await web3.eth.getChainId();
   //let decimals = await getDecimals(currency);
@@ -424,7 +423,6 @@ export async function signList(
     currency = "0x0000000000000000000000000000000000000000";
   }
 
-  //console.log(currency,platform,token,atomic(price.toString(),decimals),days,"0x0000000000000000000000000000000000000000",allowMarketplace)
 
   await new web3.eth.Contract(ERC721JSON, platform).methods
     .approve(BIDIFY.address[chainId], token)
@@ -478,10 +476,10 @@ export async function list(
  */
 
 export async function getListing(id) {
-  const web3 = new Web3(new Web3.providers.HttpProvider(URLS[await chainId]));
+  const chain_id = await chainId;
+  const web3 = new Web3(new Web3.providers.HttpProvider(URLS[chain_id]));
   const Bidify = await getBidify();
 
-  //console.log(web3, Bidify);
   const nullIfZeroAddress = (value) => {
     if (value === "0x0000000000000000000000000000000000000000") {
       return null;
@@ -497,7 +495,6 @@ export async function getListing(id) {
   let currentBid = raw.price;
   let nextBid = await Bidify.methods.getNextBid(id).call();
   let decimals = await getDecimals(currency);
-
   if (currentBid === nextBid) {
     currentBid = null;
   } else {
@@ -508,11 +505,10 @@ export async function getListing(id) {
   let marketplace = nullIfZeroAddress(raw.marketplace);
 
   let bids = [];
-
   for (let bid of await web3.eth.getPastLogs({
     fromBlock: 0,
     toBlock: "latest",
-    address: BIDIFY.address[chainId],
+    address: BIDIFY.address[chain_id],
     topics: [
       "0xdbf5dea084c6b3ed344cc0976b2643f2c9a3400350e04162ea3f7302c16ee914",
       "0x" + new web3.utils.BN(id).toString("hex").padStart(64, "0"),
@@ -557,7 +553,8 @@ export async function getListing(id) {
  * @memberof Bidify
  */
 
-export async function signBid(id) {
+export async function signBid(id, amount) {
+  // return;
   let currency = (await getListing(id)).currency;
   const chainId = await web3.eth.getBlockNumber();
 
@@ -571,16 +568,9 @@ export async function signBid(id) {
     decimals
   );
 
-  const nextBid = unatomic(
-    await Bidify.methods.getNextBid(id).call(),
-    decimals
-  );
-
-  console.log(balance, nextBid);
-
-  if (Number(balance) >= Number(nextBid)) {
+  if (Number(balance) >= Number(amount)) {
     await erc20.methods
-      .approve(Bidify._address, atomic(nextBid, decimals))
+      .approve(Bidify._address, atomic(amount, decimals))
       .send({ from: window.ethereum.selectedAddress });
   } else {
     throw "low_balance";
@@ -595,17 +585,18 @@ export async function signBid(id) {
  * @memberof Bidify
  */
 
-export async function bid(id) {
+export async function bid(id, amount) {
   let currency = (await getListing(id)).currency;
+  let decimals = await getDecimals(currency)
   const Bidify = await getBidify();
-
+  // return console.log("handle bid", id, atomic(amount, decimals).toString())
   if (currency) {
     await Bidify.methods
-      .bid(id, "0x0000000000000000000000000000000000000000")
+      .bid(id, "0x0000000000000000000000000000000000000000", atomic(amount, decimals))
       .send({ from: window?.ethereum?.selectedAddress });
   } else {
     await Bidify.methods
-      .bid(id, "0x0000000000000000000000000000000000000000")
+      .bid(id, "0x0000000000000000000000000000000000000000", amount)
       .send({
         from: window?.ethereum?.selectedAddress,
         value: await Bidify.methods.getNextBid(id).call(),

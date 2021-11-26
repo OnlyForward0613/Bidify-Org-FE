@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Field } from "formik";
 
 //IMPORTING STYLESHEET
 
@@ -131,8 +132,8 @@ export const CollectionModal = (props) => {
 };
 
 export const LiveAuctionModal = (props) => {
-  const { isModal, setIsModal, currentBid, nextBid, handleBidMethod } = props;
-
+  const { isModal, setIsModal, currentBid, nextBid, handleBidMethod, symbol } = props;
+  const [yourBid, setYourBid] = useState(nextBid);
   const renderModalHeader = (
     <div className="modal_header">
       <div></div>
@@ -150,14 +151,19 @@ export const LiveAuctionModal = (props) => {
       <Text>Current bid</Text>
       <div className="form_input">
         <section>{currentBid ? currentBid : 0}</section>
-        <Text style={{ color: "#F79420" }}>BIT</Text>
+        <Text style={{ color: "#F79420" }}>{symbol}</Text>
       </div>
-      <Text>Next bid</Text>
+      <Text>Minimum bid</Text>
       <div className="form_input">
         <section>{nextBid}</section>
-        <Text style={{ color: "#F79420" }}>BIT</Text>
+        <Text style={{ color: "#F79420" }}>{symbol}</Text>
       </div>
-      <Button variant="primary" type="submit" onClick={() => handleBidMethod()}>
+      <Text>Your bid</Text>
+      <div className="form_input">
+        <input type="number" defaultValue={nextBid} onChange={(e) => {setYourBid(e.target.value)}} />
+        <Text style={{ color: "#F79420" }}>{symbol}</Text>
+      </div>
+      <Button variant="primary" type="submit" onClick={() => handleBidMethod(yourBid)}>
         Place Your Bid
       </Button>
     </div>

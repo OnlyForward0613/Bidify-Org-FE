@@ -32,6 +32,7 @@ const MarketPlace = () => {
   const [isPriceDropdown, setIsPriceDropdown] = useState(false);
   const [isBidsDropdown, setIsBidsDropdown] = useState(false);
   const [range, setRange] = useState(0);
+  const options = {method: 'GET'};
 
   useEffect(() => {
     if (userState?.liveAuctions) {
@@ -63,7 +64,6 @@ const MarketPlace = () => {
     var filData = userState?.liveAuctions?.filter(
       ({ nextBid }) => Number(nextBid) >= range
     );
-    console.log(filData);
     setData(filData);
   }, [range]);
 
@@ -162,7 +162,6 @@ const MarketPlace = () => {
       </div>
     </div>
   );
-  console.log(range);
   const renderScreen = (
     <div className="marketplace_screen">
       <Header
